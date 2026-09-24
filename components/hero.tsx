@@ -1,162 +1,81 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { ArrowRight, Lock, Sparkles } from "lucide-react"
-
+import { categories, CategoryKey } from "@/lib/opportunities"
 import { Button } from "@/components/ui/button"
 
-export type QuickFilter = "free" | "online" | "senior" | "kz"
+interface HeroProps {
+  selectedCategory: CategoryKey | "all"
+  onSelectCategory: (cat: CategoryKey | "all") => void
+}
 
-const chips: { key: QuickFilter; label: string }[] = [
-  { key: "free", label: "Тегін" },
-  { key: "online", label: "Онлайн" },
-  { key: "senior", label: "11–12 сынып" },
-  { key: "kz", label: "Қазақстан" },
-]
-
-export function Hero({
-  onExplore,
-  onQuickFilter,
-}: {
-  onExplore: () => void
-  onQuickFilter: (key: QuickFilter) => void
-}) {
-  const imageWrapRef = useRef<HTMLDivElement>(null)
-  const [parallax, setParallax] = useState(0)
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-
-    let frame = 0
-    const onScroll = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        const el = imageWrapRef.current
-        if (!el) return
-        const rect = el.getBoundingClientRect()
-        const progress = rect.top / window.innerHeight
-        setParallax(progress * -28)
-      })
-    }
-
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener("scroll", onScroll)
-    }
-  }, [])
-
+export function Hero({ selectedCategory, onSelectCategory }: HeroProps) {
   return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_0%,color-mix(in_oklch,var(--primary)_16%,transparent),transparent)]"
-      />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-2 lg:gap-8">
-        <div className="text-center lg:text-left">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Sparkles className="size-3.5 text-accent-foreground" aria-hidden="true" />
-            Оқушыларға арналған мүмкіндіктер платформасы
-          </span>
+    <section className="pt-8 pb-12">
+      {/* Быстрый выбор категорий сверху */}
+      <div className="flex flex-wrap items-center justify-start gap-2 mb-8 overflow-x-auto pb-2">
+        <Button
+          variant={selectedCategory === "all" ? "default" : "secondary"}
+          size="sm"
+          onClick={() => onSelectCategory("all")}
+          className="rounded-full text-xs font-medium"
+        >
+          Барлығы
+        </Button>
+        {categories.map((cat) => (
+          <Button
+            key={cat.key}
+            variant={selectedCategory === cat.key ? "default" : "secondary"}
+            size="sm"
+            onClick={() => onSelectCategory(cat.key)}
+            className="rounded-full text-xs font-medium whitespace-nowrap bg-white/80 hover:bg-white shadow-sm border border-slate-100"
+          >
+            <span
+              className="w-2 h-2 rounded-full mr-2 inline-block"
+              style={{ backgroundColor: cat.color }}
+            />
+            {cat.label}
+          </Button>
+        ))}
+      </div>
 
-          <h1 className="mx-auto mt-5 max-w-3xl font-display text-4xl leading-[1.1] font-extrabold tracking-tight text-balance text-foreground sm:text-5xl lg:mx-0">
-            Болашағыңды ашатын мүмкіндіктерді бір жерден тап
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-pretty text-muted-foreground lg:mx-0">
-            Гранттар, стипендиялар, олимпиадалар, байқаулар және жазғы мектептер —
-            Қазақстан мектеп оқушыларына арналған тексерілген тізім.
-          </p>
-
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
-            <Button
-              onClick={onExplore}
-              className="h-12 rounded-xl px-6 text-base font-semibold"
-            >
-              Тіркелу
-              <ArrowRight className="size-4" data-icon="inline-end" aria-hidden="true" />
-            </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="lg:col-span-7 space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
+            <span>✨</span>
+            <span>Оқушылар мен студенттерге арналған мүмкіндіктер платформасы</span>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-            <span className="text-xs text-muted-foreground">Жылдам сүзгілер:</span>
-            {chips.map((chip) => (
-              <button
-                key={chip.key}
-                type="button"
-                onClick={() => onQuickFilter(chip.key)}
-                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-              >
-                {chip.label}
-              </button>
-            ))}
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Болашағыңды ашатын <br />
+            <span className="text-blue-600">мүмкіндіктерді</span> бір жерден тап
+          </h1>
+
+          <p className="text-slate-600 text-base max-w-xl leading-relaxed">
+            Гранттар, стипендиялар, олимпиадалар, байқаулар, хакатондар, волонтерлік және
+            жазғы мектептер — Қазақстан оқушылары мен студенттеріне арналған тексерілген тізім.
+          </p>
+
+          <div className="flex items-center gap-3 pt-2">
+            <Button size="lg" className="rounded-full px-6 text-sm font-semibold shadow-md bg-blue-600 hover:bg-blue-700">
+              Тіркелу &rarr;
+            </Button>
           </div>
         </div>
 
-        <div className="relative order-first flex items-center justify-center lg:order-last">
-          <div
-            ref={imageWrapRef}
-            className="relative flex-1"
-            style={{ transform: `translate3d(0, ${parallax}px, 0)` }}
-          >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-6 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklch,var(--primary)_18%,transparent),transparent)] blur-2xl"
-            />
-            <img
-              src="/hero-students.png"
-              alt="Кітаптар, глобус және магистр телпегі бейнеленген қазақстандық мектеп оқушыларының тобы"
-              className="animate-float-breathe relative mx-auto w-full max-w-md lg:max-w-none"
+        <div className="lg:col-span-5 flex justify-center">
+          <div className="relative w-full max-w-md aspect-square rounded-3xl bg-gradient-to-tr from-blue-100 to-indigo-50 p-6 flex items-center justify-center border border-blue-100 shadow-xl overflow-hidden">
+             <img
+              src="/illustration.png"
+              alt="Mundik"
+              className="object-contain w-full h-full rounded-2xl"
+              onError={(e) => {
+                // fallback if image not present
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
-
-          <PhoneMockup className="hidden shrink-0 xl:-ml-6 xl:block" />
         </div>
       </div>
     </section>
-  )
-}
-
-function PhoneMockup({ className }: { className?: string }) {
-  return (
-    <div className={className}>
-      <div className="rounded-[2.5rem] bg-gradient-to-br from-primary to-[color-mix(in_oklch,var(--primary)_55%,white)] p-5 shadow-2xl shadow-primary/30">
-        {/* Device */}
-        <div className="relative w-[220px] rounded-[2rem] border border-black/10 bg-black p-1.5 shadow-xl">
-          {/* Dynamic island */}
-          <div className="absolute left-1/2 top-2.5 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-black" />
-          <div className="overflow-hidden rounded-[1.6rem] bg-background">
-            {/* Browser bar */}
-            <div className="flex items-center justify-center gap-1.5 bg-muted px-3 pb-1.5 pt-6 text-[10px] text-muted-foreground">
-              <Lock className="size-2.5" aria-hidden="true" />
-              <span>infoptalap.edu.kz</span>
-            </div>
-            {/* Screen content */}
-            <div className="px-3 py-3">
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-0.5 text-[7px] font-medium text-muted-foreground">
-                <Sparkles className="size-2 text-accent-foreground" aria-hidden="true" />
-                оқушыларға арналған мүмкіндіктер платформасы
-              </span>
-              <h2 className="mt-2 font-display text-[15px] font-extrabold leading-tight text-foreground">
-                Болашағыңды ашатын мүмкіндіктерді бір жерден тап
-              </h2>
-              <p className="mt-1.5 text-[8px] leading-relaxed text-muted-foreground">
-                Гранттар, стипендиялар, олимпиадалар, байқаулар және мектептер —
-                Қазақстан мектеп оқушыларына арналған тізім.
-              </p>
-              <div className="mt-2 flex h-6 w-full items-center justify-center rounded-lg bg-primary text-[9px] font-semibold text-primary-foreground">
-                Тіркелу
-              </div>
-              <img
-                src="/hero-students.png"
-                alt=""
-                aria-hidden="true"
-                className="mt-2 w-full rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
